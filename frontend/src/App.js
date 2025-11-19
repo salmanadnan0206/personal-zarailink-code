@@ -15,7 +15,8 @@ import Signup from "./components/Auth/Signup";
 import Login from "./components/Auth/Login";
 import ForgotPassword from "./components/Auth/ForgotPassword";
 import EmailVerification from "./components/Auth/EmailVerification";
-import ResetPassword from "./components/Auth/ResetPassword"; // <-- import it
+import ResetPassword from "./components/Auth/ResetPassword";
+import VerifyEmailSuccess from "./components/Auth/VerifyEmailSuccess";
 
 function App() {
   return (
@@ -29,7 +30,8 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/verify-email" element={<EmailVerification />} />
-        <Route path="/reset-password/:token" element={<ResetPassword />} /> {/* <-- Add this */}
+        <Route path="/verify-email/:token" element={<VerifyEmailSuccess />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
 
         {/* Example protected route after login */}
         <Route path="/dashboard" element={<div>Welcome to Dashboard!</div>} />

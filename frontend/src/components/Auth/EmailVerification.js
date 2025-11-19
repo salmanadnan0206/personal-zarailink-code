@@ -21,7 +21,7 @@ export default function EmailVerification() {
   //   // }, 1000);
   // }, [navigate]);
 
-  const handleResendEmail = () => {
+  const handleResendEmail = async () => {
     if (!email) {
       setMessage("No email address found. Please sign up again.");
       return;
@@ -30,15 +30,28 @@ export default function EmailVerification() {
     setIsResending(true);
     setMessage(""); // Clear previous messages
 
-    // Simulate API call to resend verification email
-    // Replace this with your actual API call
-    console.log("Resending verification email to:", email);
-    setTimeout(() => {
+    try {
+      const response = await fetch('http://localhost:8000/accounts/api/resend-verification/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage("Verification email resent successfully!");
+      } else {
+        setMessage(data.error || "Failed to resend verification email. Please try again.");
+      }
+    } catch (error) {
+      console.error('Resend error:', error);
+      setMessage("Network error. Please check your connection and try again.");
+    } finally {
       setIsResending(false);
-      setMessage("Verification email resent successfully!");
-      // Optionally, clear the message after a few seconds
-      // setTimeout(() => setMessage(""), 3000);
-    }, 1500); // Simulate API delay
+    }
   };
 
   return (

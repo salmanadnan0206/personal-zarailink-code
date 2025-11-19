@@ -47,12 +47,28 @@ def api_signup(request):
         })
         if form.is_valid():
             user = form.save()
-            login(request, user)
-            return JsonResponse({"success": True})
+
+            # Send verification email
+            verification_url = request.build_absolute_uri(
+                f"/accounts/api/verify-email/{user.verification_token}/"
+            )
+            send_mail(
+                subject="Verify your ZaraiLink account",
+                message=f"Welcome to ZaraiLink!\n\nPlease verify your email by clicking the link below:\n{verification_url}\n\nThis link will expire in 24 hours.",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                fail_silently=False,
+            )
+
+            return JsonResponse({
+                "success": True,
+                "message": "Account created! Please check your email to verify your account.",
+                "email": user.email
+            })
         else:
             return JsonResponse({"errors": form.errors}, status=400)
-    except Exception:
-        return JsonResponse({"error": "Invalid JSON"}, status=400)
+    except Exception as e:
+        return JsonResponse({"error": "Invalid request", "details": str(e)}, status=400)
 
 
 @csrf_exempt
@@ -110,3 +126,96 @@ def api_forgot_password(request):
         return JsonResponse({"success": True})
     except Exception:
         return JsonResponse({"error": "Invalid request"}, status=400)
+
+
+def api_verify_email(request, token):
+    """
+    Verify user's email using the token sent via email
+    """
+    try:
+        user = User.objects.get(verification_token=token)
+
+        if user.email_verified:
+            return JsonResponse({
+                "success": True,
+                "message": "Email already verified. You can now login.",
+                "already_verified": True
+            })
+
+        if not user.is_verification_token_valid():
+            return JsonResponse({
+                "error": "Verification link has expired. Please request a new one.",
+                "expired": True
+            }, status=400)
+
+        # Mark email as verified and activate user
+        user.email_verified = True
+        user.is_active = True
+        user.save(update_fields=['email_verified', 'is_active'])
+
+        return JsonResponse({
+            "success": True,
+            "message": "Email verified successfully! You can now login.",
+            "verified": True
+        })
+
+    except User.DoesNotExist:
+        return JsonResponse({
+            "error": "Invalid verification link.",
+            "invalid": True
+        }, status=400)
+
+
+@csrf_exempt
+def api_resend_verification(request):
+    """
+    Resend verification email to the user
+    """
+    if request.method != "POST":
+        return JsonResponse({"error": "Only POST allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        email = data.get("email")
+
+        if not email:
+            return JsonResponse({"error": "Email is required"}, status=400)
+
+        try:
+            user = User.objects.get(email=email)
+
+            if user.email_verified:
+                return JsonResponse({
+                    "error": "Email is already verified",
+                    "already_verified": True
+                }, status=400)
+
+            # Generate new token
+            user.regenerate_verification_token()
+
+            # Send new verification email
+            verification_url = request.build_absolute_uri(
+                f"/accounts/api/verify-email/{user.verification_token}/"
+            )
+            send_mail(
+                subject="Verify your ZaraiLink account",
+                message=f"Welcome to ZaraiLink!\n\nPlease verify your email by clicking the link below:\n{verification_url}\n\nThis link will expire in 24 hours.",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                fail_silently=False,
+            )
+
+            return JsonResponse({
+                "success": True,
+                "message": "Verification email resent successfully!"
+            })
+
+        except User.DoesNotExist:
+            # Don't reveal if email exists or not for security
+            return JsonResponse({
+                "success": True,
+                "message": "If that email is registered, a verification email has been sent."
+            })
+
+    except Exception as e:
+        return JsonResponse({"error": "Invalid request", "details": str(e)}, status=400)
