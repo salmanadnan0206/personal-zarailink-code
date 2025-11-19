@@ -1,51 +1,48 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 
 export default function VerifyEmailSuccess() {
   const { token } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [status, setStatus] = useState("verifying"); // verifying, success, error, expired
   const [message, setMessage] = useState("Verifying your email...");
 
   useEffect(() => {
-    const verifyEmail = async () => {
-      try {
-        const response = await fetch(`http://localhost:8000/accounts/api/verify-email/${token}/`, {
-          method: 'GET',
-        });
+    // Check if we have a status from the query parameter (backend redirect)
+    const queryStatus = searchParams.get('status');
 
-        const data = await response.json();
-
-        if (response.ok) {
-          if (data.already_verified) {
-            setStatus("success");
-            setMessage("Your email is already verified. You can now login.");
-          } else {
-            setStatus("success");
-            setMessage(data.message || "Email verified successfully! You can now login.");
-          }
-          // Redirect to login after 3 seconds
+    if (queryStatus) {
+      // Backend has already processed the verification
+      switch (queryStatus) {
+        case 'verified':
+          setStatus("success");
+          setMessage("Email verified successfully! You can now login.");
           setTimeout(() => navigate('/login'), 3000);
-        } else {
-          if (data.expired) {
-            setStatus("expired");
-            setMessage("Verification link has expired. Please request a new one.");
-          } else {
-            setStatus("error");
-            setMessage(data.error || "Invalid verification link.");
-          }
-        }
-      } catch (error) {
-        console.error('Verification error:', error);
-        setStatus("error");
-        setMessage("Network error. Please check your connection and try again.");
+          break;
+        case 'already_verified':
+          setStatus("success");
+          setMessage("Your email is already verified. You can now login.");
+          setTimeout(() => navigate('/login'), 3000);
+          break;
+        case 'expired':
+          setStatus("expired");
+          setMessage("Verification link has expired. Please request a new one.");
+          break;
+        case 'invalid':
+          setStatus("error");
+          setMessage("Invalid verification link.");
+          break;
+        default:
+          setStatus("error");
+          setMessage("Unknown verification status.");
       }
-    };
-
-    if (token) {
-      verifyEmail();
+    } else {
+      // No query parameter, shouldn't happen with new backend
+      setStatus("error");
+      setMessage("Verification link is invalid.");
     }
-  }, [token, navigate]);
+  }, [token, navigate, searchParams]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-100 flex flex-col">
