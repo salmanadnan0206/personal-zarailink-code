@@ -62,15 +62,49 @@ export default function Signup() {
     return "Weak";
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
     setLoading(true);
-    setTimeout(() => {
+
+    try {
+      const response = await fetch('http://localhost:8000/accounts/api/signup/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          country
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Navigate to Email Verification page and pass email state
+        navigate("/verify-email", { state: { email } });
+      } else {
+        // Handle validation errors from backend
+        if (data.errors) {
+          const backendErrors = {};
+          // Map Django form errors to our state
+          if (data.errors.email) backendErrors.email = data.errors.email[0];
+          if (data.errors.password1) backendErrors.password = data.errors.password1[0];
+          if (data.errors.password2) backendErrors.confirmPassword = data.errors.password2[0];
+          setErrors(backendErrors);
+        } else {
+          setErrors({ general: data.error || 'An error occurred. Please try again.' });
+        }
+      }
+    } catch (error) {
+      console.error('Signup error:', error);
+      setErrors({ general: 'Network error. Please check your connection and try again.' });
+    } finally {
       setLoading(false);
-      // Navigate to Email Verification page and pass email state
-      navigate("/verify-email", { state: { email } });
-    }, 1200);
+    }
   };
 
   const strength = password ? passwordStrength() : null;
@@ -193,6 +227,13 @@ export default function Signup() {
               Privacy Policy
             </span>
           </p>
+
+          {/* General Error Message */}
+          {errors.general && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+              {errors.general}
+            </div>
+          )}
 
           {/* Submit */}
           <button
