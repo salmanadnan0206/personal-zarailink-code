@@ -14,7 +14,12 @@ class User(AbstractUser):
 
     # Email verification fields
     email_verified = models.BooleanField(default=False, verbose_name=_("Email Verified"))
-    verification_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    verification_token = models.UUIDField(
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
+        db_column='email_verification_token'  # Match database column name
+    )
     token_created_at = models.DateTimeField(default=timezone.now)
 
     USERNAME_FIELD = "email"

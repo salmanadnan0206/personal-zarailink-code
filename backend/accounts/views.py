@@ -117,14 +117,19 @@ def api_signup(request):
             """
 
             # Send email with both HTML and plain text versions
-            email = EmailMultiAlternatives(
-                subject="Verify your ZaraiLink Account",
-                body=text_content,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                to=[user.email]
-            )
-            email.attach_alternative(html_content, "text/html")
-            email.send(fail_silently=False)
+            try:
+                email = EmailMultiAlternatives(
+                    subject="Verify your ZaraiLink Account",
+                    body=text_content,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    to=[user.email]
+                )
+                email.attach_alternative(html_content, "text/html")
+                email.send(fail_silently=False)
+                print(f"Verification email sent to {user.email}")
+            except Exception as email_error:
+                print(f"Failed to send verification email: {email_error}")
+                # Continue anyway - user is created, they can resend verification later
 
             return JsonResponse({
                 "success": True,
@@ -360,14 +365,19 @@ def api_resend_verification(request):
             """
 
             # Send email with both HTML and plain text versions
-            email = EmailMultiAlternatives(
-                subject="Verify your ZaraiLink Account",
-                body=text_content,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                to=[user.email]
-            )
-            email.attach_alternative(html_content, "text/html")
-            email.send(fail_silently=False)
+            try:
+                email = EmailMultiAlternatives(
+                    subject="Verify your ZaraiLink Account",
+                    body=text_content,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    to=[user.email]
+                )
+                email.attach_alternative(html_content, "text/html")
+                email.send(fail_silently=False)
+                print(f"Verification email resent to {user.email}")
+            except Exception as email_error:
+                print(f"Failed to resend verification email: {email_error}")
+                # Continue anyway
 
             return JsonResponse({
                 "success": True,
