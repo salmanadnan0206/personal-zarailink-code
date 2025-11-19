@@ -22,14 +22,14 @@ urlpatterns = [
 
     # --- Password reset (Django built-in, server-rendered) ---
     path('password_reset_confirm/<uidb64>/<token>/',
-         auth_views.PasswordResetConfirmView.as_view(
-             template_name='registration/password_reset_confirm.html',
-             success_url='/accounts/password_reset_complete/'
-         ),
-         name='password_reset_confirm'),
+        auth_views.PasswordResetConfirmView.as_view(
+            template_name='registration/password_reset_confirm.html',
+            success_url='/accounts/password_reset_complete/'
+        ),
+        name='password_reset_confirm'),
     path('password_reset_complete/',
-         auth_views.PasswordResetCompleteView.as_view(
-             template_name='registration/password_reset_complete.html'
-         ),
-         name='password_reset_complete'),
+        auth_views.PasswordResetCompleteView.as_view(
+            template_name='registration/password_reset_complete.html'
+        ),
+        name='password_reset_complete'),
 ]

@@ -23,6 +23,7 @@ User = get_user_model()
 
 # Optional: Keep your existing HTML views (e.g., for testing)
 def register_view(request):
+    print("Incoming")
     if request.method == "POST":
         form = UserRegisterForm(request.POST)
         if form.is_valid():
@@ -36,9 +37,11 @@ def register_view(request):
 
 @csrf_exempt
 def api_signup(request):
+    print("Here0", request.method)
     if request.method != "POST":
         return JsonResponse({"error": "Only POST allowed"}, status=405)
     try:
+        print("Here1", settings.DEFAULT_FROM_EMAIL)
         data = json.loads(request.body)
         print(f"Received signup data: {data}")  # Debug logging
         form = UserRegisterForm({
@@ -48,7 +51,9 @@ def api_signup(request):
             "password2": data.get("password", ""),
             "country": data.get("country", ""),
         })
+        print("Hdere2")
         if form.is_valid():
+            print("Here3")
             user = form.save()
 
             # Send verification email
@@ -137,6 +142,7 @@ def api_signup(request):
                 "email": user.email
             })
         else:
+            print("Here4")
             print(f"Form errors: {form.errors}")  # Debug logging
             return JsonResponse({"errors": form.errors}, status=400)
     except Exception as e:
