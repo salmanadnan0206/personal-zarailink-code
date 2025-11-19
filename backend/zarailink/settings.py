@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',  # CORS support for React frontend
+
+    # Custom Apps
     'accounts',
 ]
 
@@ -82,8 +84,12 @@ WSGI_APPLICATION = 'zarailink.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql', # 'postgresql_psycopg2'
+        'NAME': 'zarailink',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'localhost', # remote
+        'PORT': '5432',
     }
 }
 
