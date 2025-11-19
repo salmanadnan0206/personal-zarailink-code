@@ -40,6 +40,7 @@ def api_signup(request):
         return JsonResponse({"error": "Only POST allowed"}, status=405)
     try:
         data = json.loads(request.body)
+        print(f"Received signup data: {data}")  # Debug logging
         form = UserRegisterForm({
             "name": data.get("name", ""),
             "email": data.get("email", ""),
@@ -131,8 +132,12 @@ def api_signup(request):
                 "email": user.email
             })
         else:
+            print(f"Form errors: {form.errors}")  # Debug logging
             return JsonResponse({"errors": form.errors}, status=400)
     except Exception as e:
+        print(f"Signup exception: {str(e)}")  # Debug logging
+        import traceback
+        traceback.print_exc()
         return JsonResponse({"error": "Invalid request", "details": str(e)}, status=400)
 
 
