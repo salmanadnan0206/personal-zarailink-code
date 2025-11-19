@@ -1,6 +1,7 @@
 // frontend/src/components/Auth/Login.js
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom'; // Import Link and useNavigate
+import { useAuth } from '../../context/AuthContext';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -9,6 +10,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate(); // Get the navigate function
+  const { login } = useAuth();
 
   const validate = () => {
     const newErrors = {};
@@ -20,21 +22,35 @@ const Login = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
     setLoading(true);
+    setErrors({});
 
-    // Simulate API call to login
-    // Replace this with your actual API call to your Django backend
-    console.log('Login attempt with:', { email, password });
-    setTimeout(() => {
+    try {
+      const result = await login(email, password);
+
+      if (result.success) {
+        // Successfully logged in, redirect to dashboard
+        navigate('/dashboard');
+      } else {
+        // Handle errors
+        if (result.email_not_verified) {
+          setErrors({
+            general: result.error || 'Please verify your email address before logging in.',
+            email_not_verified: true
+          });
+        } else {
+          setErrors({ general: result.error || 'Invalid email or password. Please try again.' });
+        }
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      setErrors({ general: 'An unexpected error occurred. Please try again.' });
+    } finally {
       setLoading(false);
-      // Simulate successful login (replace with actual logic)
-      // If login is successful, navigate to dashboard or home
-      // navigate('/dashboard'); // Example redirect after successful login
-      alert('Login successful! (Simulated)'); // Remove this in real implementation
-    }, 1200); // Simulate API delay
+    }
   };
 
   return (
@@ -62,6 +78,20 @@ const Login = () => {
 
           {/* --- Login Form --- */}
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* General Error Message */}
+            {errors.general && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                {errors.general}
+                {errors.email_not_verified && (
+                  <div className="mt-2">
+                    <Link to="/verify-email" className="underline font-medium">
+                      Resend verification email
+                    </Link>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Email Field */}
             <div>
               <label htmlFor="email" className="block text-gray-700 font-medium mb-1">

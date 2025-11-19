@@ -184,6 +184,23 @@ def api_logout(request):
     return JsonResponse({"success": True})
 
 
+def api_check_auth(request):
+    """
+    Check if user is authenticated and return user info
+    """
+    if request.user.is_authenticated:
+        return JsonResponse({
+            "authenticated": True,
+            "user": {
+                "name": f"{request.user.first_name} {request.user.last_name}".strip(),
+                "email": request.user.email,
+                "email_verified": request.user.email_verified
+            }
+        })
+    else:
+        return JsonResponse({"authenticated": False})
+
+
 @csrf_exempt
 def api_forgot_password(request):
     if request.method != "POST":

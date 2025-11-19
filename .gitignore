@@ -33,3 +33,11 @@ db.sqlite3-journal
 # OS
 .DS_Store
 Thumbs.db
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.class
+
+# Package files
+package-lock.json
