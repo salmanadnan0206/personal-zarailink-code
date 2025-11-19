@@ -51,7 +51,7 @@ def api_signup(request):
             "password2": data.get("password", ""),
             "country": data.get("country", ""),
         })
-        print("Hdere2")
+        print("Here2")
         if form.is_valid():
             print("Here3")
             user = form.save()

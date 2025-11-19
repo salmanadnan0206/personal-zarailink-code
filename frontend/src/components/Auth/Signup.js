@@ -80,6 +80,7 @@ export default function Signup() {
           country
         }),
       });
+      console.log(response);
 
       const data = await response.json();
 

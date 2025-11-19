@@ -185,6 +185,7 @@ CORS_ALLOW_METHODS = [
 # CSRF Settings for cross-origin requests
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
+    "http://127.0.0.1:3000/",
 ]
 CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to read CSRF cookie
 CSRF_COOKIE_SAMESITE = 'Lax'
