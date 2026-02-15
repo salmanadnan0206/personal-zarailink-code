@@ -1,6 +1,8 @@
 import re
 import datetime
 
+from django.db.models import Q
+from django.db.models.functions import Lower
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -11,6 +13,7 @@ from .services.aggregation import SupplierAggregator
 from .services.ranking import ComparableFinder
 from .services.ranking_ltr import RankingEnsemble
 from .services.query_parser import QueryInterpreter
+from trade_data.models import Transaction
 
 # Module-level singleton to avoid reloading LTR model per request
 _ranking_ensemble = None
@@ -140,51 +143,103 @@ class SearchViewSet(viewsets.ViewSet):
                 })
 
         # 1. NLP: Match query to subcategories
+        # Only run NLP if we have a real product term (not empty after stopword removal)
+        product_text = active_params.get('product', '').strip()
         matcher = QueryMatcher()
-        matched_subcategories = matcher.match(nlp_search_term)
-        
+        matched_subcategories = matcher.match(nlp_search_term) if product_text else []
+
+        # Fallback strategies when NLP finds no product match
+        company_name_search = False
+        browse_all_search = False
+
         if not matched_subcategories:
-            return Response({
-                "query": query,
-                "parsed_query": parsed_query,
-                "matched_subcategories": [],
-                "results": [],
-                "message": "No matching products found."
-            })
-
-        # 2. Aggregation: Get suppliers/buyers
-        if subcategory_id_filter:
-            try:
-                subcategory_ids = [int(subcategory_id_filter)]
-            except ValueError:
-                subcategory_ids = [m['id'] for m in matched_subcategories]
-        else:
-            # Default aggregation logic
-            top_match = matched_subcategories[0]
-            if top_match['score'] > 0.95:
-                threshold = top_match['score'] - 0.05
-                subcategory_ids = [m['id'] for m in matched_subcategories if m['score'] >= threshold]
+            # Strategy A: Try the raw query as a company/counterparty name search
+            company_results = self._search_by_company_name(query, intent, active_params.get('scope', 'WORLDWIDE'))
+            if company_results:
+                company_name_search = True
+                results = company_results
             else:
-                subcategory_ids = [m['id'] for m in matched_subcategories]
-            
-        aggregator = SupplierAggregator()
-        # Pass parser filters to aggregator
-        results = aggregator.get_suppliers_for_subcategories(
-            subcategory_ids, 
-            intent=intent,
-            scope=active_params.get('scope', 'WORLDWIDE'),
-            country_filter=country_filter,
-            price_filter=price_filter,
-            volume_filter=volume_req,
-            time_filter=time_filter
-        )
+                # Strategy B: Intent-only query ("buyers", "find suppliers") — browse all products
+                product_text = active_params.get('product', '').strip()
+                if not product_text:
+                    browse_all_search = True
+                    all_subcategory_ids = list(
+                        Transaction.objects.values_list('product_item__sub_category_id', flat=True)
+                        .distinct()[:50]
+                    )
+                    if all_subcategory_ids:
+                        aggregator = SupplierAggregator()
+                        browse_scope = active_params.get('scope', 'WORLDWIDE')
+                        results = aggregator.get_suppliers_for_subcategories(
+                            all_subcategory_ids,
+                            intent=intent,
+                            scope=browse_scope,
+                            country_filter=country_filter,
+                            price_filter=price_filter,
+                            volume_filter=volume_req,
+                            time_filter=time_filter
+                        )
+                        # If no results (e.g., SELL+WORLDWIDE with no EXPORT data),
+                        # try SELL+PAKISTAN as fallback (Pakistani buyers)
+                        if not results and intent == 'SELL' and browse_scope == 'WORLDWIDE':
+                            results = aggregator.get_suppliers_for_subcategories(
+                                all_subcategory_ids,
+                                intent='SELL',
+                                scope='PAKISTAN',
+                                country_filter=country_filter,
+                            )
+                        # Similarly for BUY+PAKISTAN with no EXPORT data
+                        if not results and intent == 'BUY' and browse_scope == 'PAKISTAN':
+                            results = aggregator.get_suppliers_for_subcategories(
+                                all_subcategory_ids,
+                                intent='BUY',
+                                scope='WORLDWIDE',
+                                country_filter=country_filter,
+                            )
+                    else:
+                        results = []
+                else:
+                    return Response({
+                        "query": query,
+                        "parsed_query": parsed_query,
+                        "matched_subcategories": [],
+                        "results": [],
+                        "message": f"No matching products found for \"{nlp_search_term}\". Try searching for a product name like 'dextrose', 'sugar', or 'urea'."
+                    })
 
-        # BUG-022: Filter by counterparty name if extracted
-        counterparty = active_params.get('counterparty_name')
-        if counterparty and results:
-            filtered = [r for r in results if counterparty.lower() in r.get('name', '').lower()]
-            if filtered:
-                results = filtered
+        if not company_name_search and not browse_all_search:
+            # Normal product-based search path
+            # 2. Aggregation: Get suppliers/buyers
+            if subcategory_id_filter:
+                try:
+                    subcategory_ids = [int(subcategory_id_filter)]
+                except ValueError:
+                    subcategory_ids = [m['id'] for m in matched_subcategories]
+            else:
+                top_match = matched_subcategories[0]
+                if top_match['score'] > 0.95:
+                    threshold = top_match['score'] - 0.05
+                    subcategory_ids = [m['id'] for m in matched_subcategories if m['score'] >= threshold]
+                else:
+                    subcategory_ids = [m['id'] for m in matched_subcategories]
+
+            aggregator = SupplierAggregator()
+            results = aggregator.get_suppliers_for_subcategories(
+                subcategory_ids,
+                intent=intent,
+                scope=active_params.get('scope', 'WORLDWIDE'),
+                country_filter=country_filter,
+                price_filter=price_filter,
+                volume_filter=volume_req,
+                time_filter=time_filter
+            )
+
+            # BUG-022: Filter by counterparty name if extracted
+            counterparty = active_params.get('counterparty_name')
+            if counterparty and results:
+                filtered = [r for r in results if counterparty.lower() in r.get('name', '').lower()]
+                if filtered:
+                    results = filtered
 
         # 3. Ranking: LTR Ensemble
         # Enrich candidates with volume_fit before ranking
@@ -224,14 +279,23 @@ class SearchViewSet(viewsets.ViewSet):
             "top_country": ranked_results[0]['country'] if ranked_results else "N/A"
         }
 
-        return Response({
+        response_data = {
             "query": query,
-            "parsed_query": parsed_query, # Debug info
+            "parsed_query": parsed_query,
             "matched_subcategories": matched_subcategories,
             "results": ranked_results,
             "market_snapshot": market_snapshot,
             "count": len(ranked_results)
-        })
+        }
+        if company_name_search:
+            response_data["search_type"] = "company"
+            response_data["message"] = f"Showing results for company matching \"{query}\""
+        elif browse_all_search:
+            response_data["search_type"] = "browse"
+            entity_type = "buyers" if intent == "SELL" else "suppliers"
+            response_data["message"] = f"Browsing all {entity_type}"
+
+        return Response(response_data)
 
     @action(detail=False, methods=['get'], url_path='supplier-detail')
     def supplier_detail(self, request):
@@ -320,6 +384,97 @@ class SearchViewSet(viewsets.ViewSet):
             "raw_matches": matches
         })
     
+    def _search_by_company_name(self, query, intent='BUY', scope='WORLDWIDE'):
+        """
+        Search for companies by name across all products.
+        Returns aggregated results matching the company name, or empty list.
+        """
+        search_term = query.strip()
+        # Remove common intent words to isolate the company name
+        for word in ['buy', 'sell', 'find', 'search', 'show', 'from', 'suppliers', 'buyers']:
+            search_term = re.sub(r'\b' + word + r'\b', '', search_term, flags=re.IGNORECASE)
+        search_term = search_term.strip()
+        if not search_term or len(search_term) < 2:
+            return []
+
+        # Determine which field to search based on intent
+        if intent == 'SELL':
+            if scope == 'PAKISTAN':
+                name_field = 'buyer'
+                qs = Transaction.objects.filter(trade_type='IMPORT', destination_country='Pakistan')
+            else:
+                name_field = 'buyer'
+                qs = Transaction.objects.filter(trade_type='EXPORT', origin_country='Pakistan')
+        else:
+            if scope == 'PAKISTAN':
+                name_field = 'seller'
+                qs = Transaction.objects.filter(trade_type='EXPORT', origin_country='Pakistan')
+            else:
+                name_field = 'seller'
+                qs = Transaction.objects.filter(trade_type='IMPORT', destination_country='Pakistan')
+
+        # Case-insensitive partial match on company name
+        filter_kwargs = {f"{name_field}__icontains": search_term}
+        matched_qs = qs.filter(**filter_kwargs)
+
+        # If exact partial match fails, try fuzzy: search each word individually
+        if not matched_qs.exists():
+            words = search_term.split()
+            q_filter = Q()
+            for word in words:
+                if len(word) >= 3:
+                    q_filter &= Q(**{f"{name_field}__icontains": word})
+            if q_filter:
+                matched_qs = qs.filter(q_filter)
+
+        # If still no match, try progressively shorter prefixes of the longest word
+        if not matched_qs.exists():
+            words = sorted(search_term.split(), key=len, reverse=True)
+            for word in words:
+                if len(word) >= 4:
+                    # Try shrinking prefix: "seawell" → "seawel" → "seawe" → "seaw"
+                    for trim in range(1, len(word) - 2):
+                        prefix = word[:len(word)-trim]
+                        if len(prefix) < 3:
+                            break
+                        matched_qs = qs.filter(**{f"{name_field}__icontains": prefix})
+                        if matched_qs.exists():
+                            break
+                    if matched_qs.exists():
+                        break
+
+        if not matched_qs.exists():
+            return []
+
+        qs = matched_qs
+
+        # Aggregate results for matching companies
+        from django.db.models import Sum, Count, Avg, Max
+        country_field = 'origin_country' if name_field == 'seller' else 'destination_country'
+
+        results = qs.values(name_field, country_field).annotate(
+            total_volume=Sum('qty_mt'),
+            avg_price=Avg('usd_per_mt'),
+            shipment_count=Count('id'),
+            last_shipment_date=Max('reporting_date'),
+            max_shipment_vol=Max('qty_mt')
+        ).order_by('-total_volume')
+
+        counterparties = []
+        for r in results:
+            counterparties.append({
+                "name": r[name_field],
+                "country": r[country_field],
+                "total_volume": float(r['total_volume'] or 0),
+                "avg_price": float(r['avg_price']) if r['avg_price'] is not None else None,
+                "shipment_count": r['shipment_count'],
+                "last_shipment_date": r['last_shipment_date'],
+                "max_shipment_vol": float(r['max_shipment_vol'] or 0),
+                "type": "Buyer" if intent == 'SELL' else "Supplier"
+            })
+
+        return counterparties
+
     def _extract_top_n(self, query):
         """
         Extract the number N from queries like 'top 3', 'best 5', 'suggest 10', etc.
