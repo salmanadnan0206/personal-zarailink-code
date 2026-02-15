@@ -206,6 +206,24 @@ Print-Info "Running database migrations..."
 python manage.py migrate --no-input
 Print-Step "Migrations complete"
 
+# Load database fixture (if available and DB is empty)
+$txCount = python manage.py shell -c "from trade_data.models import Transaction; print(Transaction.objects.count())" 2>$null
+if ([int]$txCount -gt 0) {
+    Print-Skip "Database fixture (data already present)"
+} else {
+    if (Test-Path "..\load_data.json") {
+        Print-Info "Loading database fixture (load_data.json)..."
+        try {
+            python manage.py loaddata ..\load_data.json
+            Print-Step "Database fixture loaded"
+        } catch {
+            Print-Info "Fixture loading failed, will load data individually below"
+        }
+    } else {
+        Print-Info "No load_data.json found, will load data individually below"
+    }
+}
+
 # Setup company roles
 Print-Info "Setting up company roles..."
 python manage.py setup_company_roles

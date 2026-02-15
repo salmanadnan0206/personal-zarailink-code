@@ -232,6 +232,21 @@ print_info "Running database migrations..."
 python manage.py migrate --no-input
 print_step "Migrations complete"
 
+# Load database fixture (if available and DB is empty)
+if python manage.py shell -c "from trade_data.models import Transaction; exit(0 if Transaction.objects.count() > 0 else 1)" 2>/dev/null; then
+    print_skip "Database fixture (data already present)"
+else
+    if [ -f "../load_data.json" ]; then
+        print_info "Loading database fixture (load_data.json)..."
+        python manage.py loaddata ../load_data.json || {
+            print_info "Fixture loading failed, will load data individually below"
+        }
+        print_step "Database fixture loaded"
+    else
+        print_info "No load_data.json found, will load data individually below"
+    fi
+fi
+
 # Setup company roles
 print_info "Setting up company roles..."
 python manage.py setup_company_roles
