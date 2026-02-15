@@ -1,17 +1,25 @@
+import re
+import datetime
 
-from rest_framework import viewsets, status
+from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny # Kept as it was not explicitly removed by the instruction
-# from django.conf import settings # Removed as it's not used in the new code
+from rest_framework.permissions import AllowAny
 
 from .services.nlp import QueryMatcher
 from .services.aggregation import SupplierAggregator
-from .services.ranking import SupplierRanker, ComparableFinder # Added ComparableFinder
-# Import models if needed for simple lookups
-from trade_data.models import ProductSubCategory # Added
+from .services.ranking import ComparableFinder
+from .services.ranking_ltr import RankingEnsemble
+from .services.query_parser import QueryInterpreter
 
-from .services.query_parser import QueryInterpreter # Added
+# Module-level singleton to avoid reloading LTR model per request
+_ranking_ensemble = None
+
+def get_ranking_ensemble():
+    global _ranking_ensemble
+    if _ranking_ensemble is None:
+        _ranking_ensemble = RankingEnsemble()
+    return _ranking_ensemble
 
 class SearchViewSet(viewsets.ViewSet):
     """
@@ -25,12 +33,7 @@ class SearchViewSet(viewsets.ViewSet):
         """
         query = request.query_params.get('q', '').strip()
         scope_param = request.query_params.get('scope', None)
-        
-        # Support POST body for complex queries if needed
-        if not query and request.method == 'POST':
-            query = request.data.get('q', '')
-            scope_param = request.data.get('scope', None)
-            
+
         if not query:
             return Response({"error": "Query parameter 'q' is required"}, status=400)
 
@@ -106,18 +109,32 @@ class SearchViewSet(viewsets.ViewSet):
         subcategory_id_filter = request.query_params.get('subcategory_id')
 
         # Scope + Country conflict detection
-        # If scope=PAKISTAN but user specified a non-Pakistan country filter,
-        # the filters would conflict (e.g., origin_country='Pakistan' AND origin_country__in=['China']).
-        # Return a helpful error instead of silently returning 0 results.
         active_scope = active_params.get('scope', 'WORLDWIDE')
+
+        # BUG-024: If user says "buy from Pakistan" with WORLDWIDE scope,
+        # auto-switch to PAKISTAN scope since WORLDWIDE filters by origin_country
+        # and Pakistan's imports have foreign origins.
+        if active_scope == 'WORLDWIDE' and country_filter:
+            pakistan_in_filter = [c for c in country_filter if c.lower() == 'pakistan']
+            if pakistan_in_filter and len(country_filter) == 1:
+                active_scope = 'PAKISTAN'
+                active_params['scope'] = 'PAKISTAN'
+                country_filter = []
+                active_params['country_filter'] = []
+
+        # BUG-007: Check for both BUY and SELL intent conflicts
         if active_scope == 'PAKISTAN' and country_filter:
             non_pakistan_countries = [c for c in country_filter if c.lower() != 'pakistan']
             if non_pakistan_countries:
+                if intent == 'BUY':
+                    conflict_msg = f"You are searching for Pakistani suppliers but specified {', '.join(non_pakistan_countries)} as a country filter. Switch scope to Worldwide to search international suppliers."
+                else:
+                    conflict_msg = f"You are searching for Pakistani buyers but specified {', '.join(non_pakistan_countries)} as a country filter. Switch scope to Worldwide to search international buyers."
                 return Response({
                     "query": query,
                     "parsed_query": parsed_query,
                     "error": "scope_country_conflict",
-                    "message": f"You are searching within Pakistan scope but specified {', '.join(non_pakistan_countries)} as a country filter. Please switch your scope to Worldwide to search for international suppliers.",
+                    "message": conflict_msg,
                     "results": [],
                     "count": 0
                 })
@@ -162,10 +179,30 @@ class SearchViewSet(viewsets.ViewSet):
             time_filter=time_filter
         )
 
+        # BUG-022: Filter by counterparty name if extracted
+        counterparty = active_params.get('counterparty_name')
+        if counterparty and results:
+            filtered = [r for r in results if counterparty.lower() in r.get('name', '').lower()]
+            if filtered:
+                results = filtered
+
         # 3. Ranking: LTR Ensemble
-        from .services.ranking_ltr import RankingEnsemble
-        ranker = RankingEnsemble()
-        ranked_results = ranker.rank_candidates(results, parsed_query)
+        # Enrich candidates with volume_fit before ranking
+        for cand in results:
+            if volume_req:
+                max_vol = cand.get('max_shipment_vol', 0)
+                total_vol = cand.get('total_volume', 0)
+                if max_vol >= volume_req * 1.2:
+                    cand['volume_fit'] = 'Strong'
+                elif max_vol >= volume_req:
+                    cand['volume_fit'] = 'Good'
+                elif total_vol >= volume_req:
+                    cand['volume_fit'] = 'Partial'
+                else:
+                    cand['volume_fit'] = 'Low'
+
+        ranker = get_ranking_ensemble()
+        ranked_results = ranker.rank_candidates(results, active_params)
         
         # 3.5. Family-Based Result Filtering
         family = active_params.get('family', 1)
@@ -180,9 +217,10 @@ class SearchViewSet(viewsets.ViewSet):
 
         # 4. Enhance: Add Badges & Market Snapshot
         # ... existing logic ...
+        priced_results = [s for s in ranked_results if s.get('avg_price') is not None]
         market_snapshot = {
             "total_count": len(ranked_results),
-            "avg_price_global": sum(s['avg_price'] for s in ranked_results) / len(ranked_results) if ranked_results else 0,
+            "avg_price_global": sum(s['avg_price'] for s in priced_results) / len(priced_results) if priced_results else None,
             "top_country": ranked_results[0]['country'] if ranked_results else "N/A"
         }
 
@@ -198,45 +236,45 @@ class SearchViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['get'], url_path='supplier-detail')
     def supplier_detail(self, request):
         """
-        GET /api/search/supplier-detail/?name=XYZ&query=dextrose
-        Returns deep-dive data for the supplier page.
+        GET /api/search/supplier-detail/?name=XYZ&query=dextrose&intent=BUY&scope=WORLDWIDE
+        Returns deep-dive data for the supplier/buyer page.
         """
-        seller_name = request.query_params.get('name')
-        query = request.query_params.get('query') # Context mainly to map to subcategories
-        
-        if not seller_name or not query:
+        name = request.query_params.get('name')
+        query = request.query_params.get('query')
+        detail_intent = request.query_params.get('intent', 'BUY').upper()
+        detail_scope = request.query_params.get('scope', 'WORLDWIDE').upper()
+
+        if not name or not query:
             return Response({"error": "Params 'name' and 'query' are required"}, status=400)
 
-        # 1. Re-match query to get context (subcategory IDs)
-        # In a real app, we might pass subcategory_id directly from frontend to save NLP step
+        # 1. Parse query to extract just the product term
+        interpreter = QueryInterpreter()
+        parsed = interpreter.parse(query)
+        search_term = parsed.get('product') or query
+
+        # 2. Match to subcategories using the cleaned product term
         matcher = QueryMatcher()
-        matched_subcategories = matcher.match(query)
+        matched_subcategories = matcher.match(search_term)
         subcategory_ids = [m['id'] for m in matched_subcategories]
-        
-        # 2. Get Detail Stats
+
+        # 3. Get Detail Stats (pass intent so correct field is used)
         aggregator = SupplierAggregator()
-        details = aggregator.get_supplier_details(seller_name, subcategory_ids)
-        
+        details = aggregator.get_supplier_details(name, subcategory_ids, intent=detail_intent)
+
         if not details:
-            return Response({"error": "Supplier not found for this product"}, status=404)
-            
-        # 3. Get Comparables
-        # We need to fetch 'all suppliers' for this product to find comparables
-        # Optimization: We could cache this or have a specialized query
-        all_suppliers = aggregator.get_suppliers_for_subcategories(subcategory_ids)
-        
-        # Rank them using LTR so comparables are high quality
-        from .services.ranking_ltr import RankingEnsemble
-        ranker = RankingEnsemble()
-        # Parse query might be minimal here, construct dummy if needed or pass context
-        # If 'query' param exists, parse it.
-        from .services.query_parser import QueryInterpreter
-        context_query = QueryInterpreter().parse(query) if query else {}
-        
+            return Response({"error": "Supplier/buyer not found for this product"}, status=404)
+
+        # 4. Get Comparables using same intent and scope as original search
+        all_suppliers = aggregator.get_suppliers_for_subcategories(
+            subcategory_ids, intent=detail_intent, scope=detail_scope
+        )
+
+        ranker = get_ranking_ensemble()
+        context_query = parsed if parsed else {}
         ranked_all = ranker.rank_candidates(all_suppliers, context_query)
-        
+
         finder = ComparableFinder()
-        comparables = finder.find_comparables(seller_name, subcategory_ids, ranked_all)
+        comparables = finder.find_comparables(name, subcategory_ids, ranked_all)
         
 
         # 4. Market Context (Dynamic)
@@ -287,7 +325,6 @@ class SearchViewSet(viewsets.ViewSet):
         Extract the number N from queries like 'top 3', 'best 5', 'suggest 10', etc.
         Returns the number or None if not found.
         """
-        import re
         # Match patterns like "top 3", "best 5", "first 10", etc.
         pattern = r'\b(?:top|best|first|suggest)\s+(\d+)\b'
         match = re.search(pattern, query.lower())
@@ -295,52 +332,76 @@ class SearchViewSet(viewsets.ViewSet):
             return int(match.group(1))
         return None
     
+    MONTH_MAP = {
+        'january': 1, 'jan': 1, 'february': 2, 'feb': 2, 'march': 3, 'mar': 3,
+        'april': 4, 'apr': 4, 'may': 5, 'june': 6, 'jun': 6,
+        'july': 7, 'jul': 7, 'august': 8, 'aug': 8, 'september': 9, 'sep': 9,
+        'october': 10, 'oct': 10, 'november': 11, 'nov': 11, 'december': 12, 'dec': 12
+    }
+
     def _parse_time_range(self, time_range_str):
         """
-        Parses strings like "Q1 2025", "2024", "Last 6 Months".
+        Parses strings like "Q1 2025", "2024", "Last 6 Months", "last 2 years",
+        "january to march", "this year".
         Returns dict {start_date, end_date} or None.
         """
-        import datetime
-        
         if not time_range_str:
             return None
-            
+
         today = datetime.date.today()
         start_date = None
         end_date = None
-        
         tr = time_range_str.lower().strip()
-        
-        # Simple heuristics
-        if "q1" in tr and "2025" in tr:
-            start_date = datetime.date(2025, 1, 1)
-            end_date = datetime.date(2025, 3, 31)
-        elif "q2" in tr and "2025" in tr:
-            start_date = datetime.date(2025, 4, 1)
-            end_date = datetime.date(2025, 6, 30)
-        elif "q3" in tr and "2025" in tr:
-            start_date = datetime.date(2025, 7, 1)
-            end_date = datetime.date(2025, 9, 30)
-        elif "q4" in tr and "2025" in tr:
-            start_date = datetime.date(2025, 10, 1)
-            end_date = datetime.date(2025, 12, 31)
-        elif "2025" in tr:
-            start_date = datetime.date(2025, 1, 1)
-            end_date = datetime.date(2025, 12, 31)
-        elif "2024" in tr:
-            start_date = datetime.date(2024, 1, 1)
-            end_date = datetime.date(2024, 12, 31)
-        elif "last 6 months" in tr or "last 6 month" in tr:
-            end_date = today
-            start_date = today - datetime.timedelta(days=180)
-        elif "last 3 months" in tr or "last 3 month" in tr:
-            end_date = today
-            start_date = today - datetime.timedelta(days=90)
+
+        # 1. Dynamic quarter parsing: "Q1 2025", "Q3 2023", "Q2" (defaults to current year)
+        q_match = re.search(r'\bq([1-4])\s*(\d{4})?\b', tr)
+        if q_match:
+            quarter = int(q_match.group(1))
+            year = int(q_match.group(2)) if q_match.group(2) else today.year
+            q_starts = {1: (1, 1), 2: (4, 1), 3: (7, 1), 4: (10, 1)}
+            q_ends = {1: (3, 31), 2: (6, 30), 3: (9, 30), 4: (12, 31)}
+            start_date = datetime.date(year, *q_starts[quarter])
+            end_date = datetime.date(year, *q_ends[quarter])
+
+        # 2. "last N months/years" — dynamic
+        elif re.search(r'last\s+\d+\s+(?:month|year)', tr):
+            m = re.search(r'last\s+(\d+)\s+(month|year)s?', tr)
+            if m:
+                n = int(m.group(1))
+                unit = m.group(2)
+                end_date = today
+                if unit == 'month':
+                    start_date = today - datetime.timedelta(days=n * 30)
+                else:
+                    start_date = today - datetime.timedelta(days=n * 365)
+
+        # 3. Month-name range: "january to march"
+        elif ' to ' in tr:
+            parts = tr.split(' to ')
+            if len(parts) == 2:
+                m1 = self.MONTH_MAP.get(parts[0].strip())
+                m2 = self.MONTH_MAP.get(parts[1].strip())
+                if m1 and m2:
+                    import calendar
+                    year = today.year
+                    start_date = datetime.date(year, m1, 1)
+                    last_day = calendar.monthrange(year, m2)[1]
+                    end_date = datetime.date(year, m2, last_day)
+
+        # 4. "this year"
         elif "this year" in tr:
             start_date = datetime.date(today.year, 1, 1)
             end_date = datetime.date(today.year, 12, 31)
-            
+
+        # 5. Plain year: "2024", "2025"
+        else:
+            year_match = re.search(r'\b(20\d{2})\b', tr)
+            if year_match:
+                year = int(year_match.group(1))
+                start_date = datetime.date(year, 1, 1)
+                end_date = datetime.date(year, 12, 31)
+
         if start_date or end_date:
             return {"start_date": start_date, "end_date": end_date}
-            
+
         return None
