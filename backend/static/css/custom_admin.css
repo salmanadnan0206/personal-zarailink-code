@@ -1,0 +1,303 @@
+/* Custom Admin Theme - Light & Clean */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+    --primary-color: #10b981;
+    --primary-hover: #059669;
+    --text-color: #1f2937;
+    --bg-color: #f3f4f6;
+    --card-bg: #ffffff;
+    --border-color: #e5e7eb;
+    --header-bg: #ffffff;
+    --sidebar-bg: #ffffff;
+    --link-color: #10b981;
+}
+
+/* Global Overrides */
+body, html {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    background-color: var(--bg-color) !important;
+    color: var(--text-color) !important;
+}
+
+/* Header */
+#header {
+    background: var(--header-bg) !important;
+    color: var(--text-color) !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    padding: 1rem 2rem;
+    height: auto;
+}
+
+#header #branding h1, #header #branding h1 a {
+    color: var(--text-color) !important;
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+
+#header a:link, #header a:visited {
+    color: var(--text-color) !important;
+}
+
+#header .user-tools {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Content Area - Critical Fix */
+#content, .content, #content-main, .colM, .colMS {
+    background: var(--bg-color) !important;
+    color: var(--text-color) !important;
+    padding: 2rem;
+}
+
+/* Main Container */
+#container {
+    background: transparent !important;
+    min-width: 0;
+}
+
+/* Navigation Sidebar */
+#content-related, .module {
+    background: var(--card-bg) !important;
+    color: var(--text-color) !important;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border: 1px solid var(--border-color);
+}
+
+/* All Headings - Critical Fix for Visibility */
+h1, h2, h3, h4, h5, h6,
+#content h1, #content h2, #content h3, #content h4, #content h5, #content h6,
+.module h2, .module h3, .dashboard h1, .dashboard h2, .dashboard h3,
+caption, .module caption {
+    color: var(--text-color) !important;
+    background: transparent !important;
+}
+
+/* Change List */
+#changelist, #changelist-form, .results {
+    background: var(--card-bg) !important;
+    color: var(--text-color) !important;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+#changelist table {
+    background: var(--card-bg) !important;
+}
+
+/* Tables */
+table, thead, tbody, tr, td, th {
+    background: transparent !important;
+    color: var(--text-color) !important;
+    border-color: var(--border-color) !important;
+}
+
+th {
+    font-weight: 600 !important;
+    color: #6b7280 !important;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    background: #f9fafb !important;
+    padding: 1rem;
+}
+
+td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+tr.row1, tr.row2 {
+    background: white !important;
+}
+
+tr:hover td {
+    background: #f9fafb !important;
+}
+
+/* Action Boxes */
+.actions, .submit-row {
+    background: var(--card-bg) !important;
+    padding: 1rem;
+    border-radius: 6px;
+}
+
+/* Buttons */
+.button, input[type=submit], input[type=button], .submit-row input, a.button, button {
+    background: var(--primary-color) !important;
+    color: white !important;
+    border: none !important;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: none;
+}
+
+.button:hover, input[type=submit]:hover, input[type=button]:hover, .submit-row input:hover, a.button:hover {
+    background: var(--primary-hover) !important;
+}
+
+/* Breadcrumbs */
+div.breadcrumbs {
+    background: white !important;
+    padding: 1rem 2rem;
+    border-bottom: 1px solid var(--border-color);
+    color: #6b7280 !important;
+}
+
+div.breadcrumbs a {
+    color: var(--primary-color) !important;
+}
+
+/* Forms */
+.form-row {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    background: transparent !important;
+}
+
+input[type=text], input[type=password], input[type=email], input[type=url], 
+input[type=number], textarea, select {
+    border: 1px solid var(--border-color) !important;
+    border-radius: 6px;
+    padding: 0.5rem;
+    font-family: inherit;
+    background: white !important;
+    color: var(--text-color) !important;
+}
+
+input:focus, textarea:focus, select:focus {
+    border-color: var(--primary-color) !important;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
+}
+
+/* Filters Sidebar */
+#changelist-filter {
+    background: var(--card-bg) !important;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+#changelist-filter h2, #changelist-filter h3 {
+    color: var(--text-color) !important;
+    background: transparent !important;
+}
+
+#changelist-filter li a {
+    color: var(--text-color) !important;
+}
+
+#changelist-filter li.selected a {
+    color: var(--primary-color) !important;
+    font-weight: 600;
+}
+
+/* Search Bar */
+#toolbar, #changelist-search {
+    background: var(--card-bg) !important;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+#searchbar {
+    background: white !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+/* Dashboard Modules */
+.dashboard .module {
+    background: var(--card-bg) !important;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin-bottom: 2rem;
+}
+
+.dashboard .module table {
+    background: transparent !important;
+}
+
+.dashboard .module caption, .dashboard .module h2 {
+    background: transparent !important;
+    color: var(--text-color) !important;
+    font-weight: 600;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Links */
+a:link, a:visited {
+    color: var(--link-color) !important;
+}
+
+a:hover {
+    color: var(--primary-hover) !important;
+}
+
+/* Custom Dropdown in Header */
+.admin-plan-select {
+    padding: 0.5rem;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    margin-right: 0.5rem;
+    font-size: 0.9rem;
+    background: white !important;
+    color: var(--text-color) !important;
+}
+
+.admin-generate-btn {
+    background: var(--primary-color) !important;
+    color: white !important;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.admin-generate-form {
+    display: flex;
+    align-items: center;
+    margin-right: 2rem;
+}
+
+/* Pagination */
+.paginator {
+    background: transparent !important;
+    color: var(--text-color) !important;
+}
+
+.paginator a:link, .paginator a:visited {
+    background: var(--card-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-color) !important;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+/* Messages */
+.messagelist li {
+    background: var(--primary-color) !important;
+    color: white !important;
+}
+
+.messagelist .success {
+    background: #10b981 !important;
+}
+
+.messagelist .warning {
+    background: #f59e0b !important;
+}
+
+.messagelist .error {
+    background: #ef4444 !important;
+}

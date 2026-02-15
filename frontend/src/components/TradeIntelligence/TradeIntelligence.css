@@ -1,0 +1,1527 @@
+/* Trade Intelligence Shared Styles */
+
+.placeholder-container {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.placeholder-title {
+  font-size: 3rem;
+  font-weight: 600;
+  color: #2d3748;
+  text-align: center;
+  padding: 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Trade Ledger Styles */
+.trade-ledger-container {
+  padding: 2rem;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+.trade-ledger-header {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  padding: 3rem 2rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+}
+
+.trade-ledger-header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.trade-ledger-header p {
+  font-size: 1.1rem;
+  opacity: 0.95;
+}
+
+/* Filters Section */
+.filters-section {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+}
+
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-group label {
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.filter-group select,
+.filter-group input {
+  padding: 0.75rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.2s;
+  background: white;
+}
+
+.filter-group select:focus,
+.filter-group input:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/* Metrics Cards */
+.metrics-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.metric-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border-left: 4px solid #10b981;
+  transition: transform 0.2s;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.metric-card h3 {
+  font-size: 0.9rem;
+  color: #718096;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metric-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2d3748;
+}
+
+.metric-subtext {
+  font-size: 0.9rem;
+  color: #a0aec0;
+  margin-top: 0.5rem;
+}
+
+/* Companies Grid */
+.companies-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.company-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.75rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+.company-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+  border-color: #10b981;
+}
+
+.company-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.company-card h3 {
+  font-size: 1.3rem;
+  color: #2d3748;
+  margin-bottom: 0.3rem;
+}
+
+.company-location {
+  color: #718096;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.company-badge {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.company-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: #718096;
+  margin-bottom: 0.3rem;
+}
+
+.stat-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2d3748;
+}
+
+/* Loading and Empty States */
+.loading-container,
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.spinner {
+  border: 4px solid #f3f4f6;
+  border-top: 4px solid #10b981;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Company Detail Page */
+.company-detail-container {
+  padding: 2rem;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+.company-detail-header {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  padding: 2.5rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.company-detail-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.company-tags {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.company-tag {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+}
+
+/* Tab Navigation */
+.tab-navigation {
+  background: white;
+  border-radius: 12px;
+  padding: 0.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  display: flex;
+  gap: 0.5rem;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 1rem;
+  border: none;
+  background: transparent;
+  color: #718096;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.tab-button.active {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.tab-button:hover:not(.active) {
+  background: #f7fafc;
+}
+
+/* Tab Content */
+.tab-content {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+/* Info Cards Grid */
+.info-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.info-card {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 1.5rem;
+  border-radius: 12px;
+  border-left: 4px solid #10b981;
+}
+
+.info-card h4 {
+  font-size: 0.85rem;
+  color: #718096;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-card-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #2d3748;
+}
+
+/* Product Table */
+.products-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.5rem;
+}
+
+.products-table thead {
+  background: #f7fafc;
+}
+
+.products-table th,
+.products-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.products-table th {
+  font-weight: 700;
+  color: #2d3748;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}
+
+.products-table td {
+  color: #4a5568;
+}
+
+.products-table tr:hover {
+  background: #f7fafc;
+}
+
+/* Growth Badge */
+.growth-badge {
+  display: inline-block;
+  padding: 0.3rem 0.7rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.growth-badge.positive {
+  background: #c6f6d5;
+  color: #22543d;
+}
+
+.growth-badge.negative {
+  background: #fed7d7;
+  color: #742a2a;
+}
+
+/* Charts Container */
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.chart-container {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.chart-container h3 {
+  font-size: 1.2rem;
+  color: #2d3748;
+  margin-bottom: 1.5rem;
+}
+
+/* Partners Grid */
+.partners-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.partner-card {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 1.5rem;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.partner-flag {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.partner-country {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+}
+
+.partner-volume {
+  font-size: 0.9rem;
+  color: #718096;
+}
+
+/* Responsive Design - Enhanced for all screen sizes */
+
+/* Tablet (768px - 1024px) */
+@media (max-width: 1024px) {
+  .trade-ledger-container,
+  .company-detail-container {
+    padding: 1.5rem;
+  }
+  
+  .companies-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .metrics-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile (768px and below) */
+@media (max-width: 768px) {
+  .trade-ledger-container,
+  .company-detail-container {
+    padding: 1rem;
+  }
+  
+  .trade-ledger-header {
+    padding: 2rem 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .trade-ledger-header h1 {
+    font-size: 1.75rem;
+  }
+  
+  .trade-ledger-header p {
+    font-size: 0.95rem;
+  }
+  
+  .filters-section {
+    padding: 1rem;
+  }
+  
+  .filters-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .metrics-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .metric-card {
+    padding: 1.25rem;
+  }
+  
+  .metric-value {
+    font-size: 1.5rem;
+  }
+  
+  .companies-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .company-card {
+    padding: 1.25rem;
+  }
+  
+  .company-card h3 {
+    font-size: 1.1rem;
+  }
+  
+  .company-stats {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .tab-navigation {
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.25rem;
+  }
+  
+  .tab-button {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+  
+  .tab-content {
+    padding: 1rem;
+  }
+  
+  .info-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .info-card-value {
+    font-size: 1.5rem;
+  }
+  
+  .charts-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .chart-container {
+    padding: 1rem;
+  }
+  
+  .partners-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  
+  .partner-card {
+    padding: 1rem;
+  }
+  
+  .partner-flag {
+    font-size: 2rem;
+  }
+  
+  /* Table responsive scroll */
+  .products-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .products-table th,
+  .products-table td {
+    padding: 0.75rem;
+    font-size: 0.85rem;
+  }
+  
+  .company-detail-header {
+    padding: 1.5rem;
+  }
+  
+  .company-detail-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .company-tags {
+    flex-wrap: wrap;
+    gap: 0.375rem;
+  }
+  
+  .company-tag {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+  }
+  
+  .placeholder-title {
+    font-size: 1.75rem;
+    padding: 1.5rem;
+  }
+}
+
+/* Small Mobile (480px and below) */
+@media (max-width: 480px) {
+  .trade-ledger-container,
+  .company-detail-container {
+    padding: 0.75rem;
+  }
+  
+  .trade-ledger-header {
+    padding: 1.5rem 1rem;
+    border-radius: 8px;
+  }
+  
+  .trade-ledger-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .partners-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .company-card-header {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .company-badge {
+    align-self: flex-start;
+  }
+  
+  .metric-card h3 {
+    font-size: 0.8rem;
+  }
+  
+  .metric-value {
+    font-size: 1.25rem;
+  }
+}
+
+/* Dark Mode Support */
+.trade-ledger-container,
+.company-detail-container {
+  background-color: var(--bg-secondary);
+}
+
+.filters-section,
+.metric-card,
+.company-card,
+.tab-navigation,
+.tab-content,
+.chart-container {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+}
+
+.filter-group label {
+  color: var(--text-primary);
+}
+
+.filter-group select,
+.filter-group input {
+  background: var(--input-bg);
+  border-color: var(--input-border);
+  color: var(--text-primary);
+}
+
+.filter-group select:focus,
+.filter-group input:focus {
+  border-color: var(--color-primary);
+}
+
+.metric-card h3 {
+  color: var(--text-secondary);
+}
+
+.metric-value {
+  color: var(--text-primary);
+}
+
+.metric-subtext {
+  color: var(--text-tertiary);
+}
+
+.company-card h3 {
+  color: var(--text-primary);
+}
+
+.company-location {
+  color: var(--text-secondary);
+}
+
+.company-stats {
+  border-top-color: var(--border-primary);
+}
+
+.stat-label {
+  color: var(--text-secondary);
+}
+
+.stat-value {
+  color: var(--text-primary);
+}
+
+.tab-button {
+  color: var(--text-secondary);
+}
+
+.tab-button:hover:not(.active) {
+  background: var(--bg-hover);
+}
+
+.info-card {
+  background: var(--bg-tertiary);
+}
+
+.info-card h4 {
+  color: var(--text-secondary);
+}
+
+.info-card-value {
+  color: var(--text-primary);
+}
+
+.products-table thead {
+  background: var(--bg-tertiary);
+}
+
+.products-table th {
+  color: var(--text-primary);
+}
+
+.products-table td {
+  color: var(--text-secondary);
+}
+
+.products-table th,
+.products-table td {
+  border-bottom-color: var(--border-primary);
+}
+
+.products-table tr:hover {
+  background: var(--bg-hover);
+}
+
+.partner-card {
+  background: var(--bg-tertiary);
+}
+
+.partner-country {
+  color: var(--text-primary);
+}
+
+.partner-volume {
+  color: var(--text-secondary);
+}
+
+.chart-container h3 {
+  color: var(--text-primary);
+}
+
+.placeholder-container {
+  background: var(--bg-secondary);
+}
+
+.placeholder-title {
+  background: var(--card-bg);
+  color: var(--text-primary);
+}
+
+/* Trade Ledger Table Styles */
+.trade-ledger-table-container {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+}
+
+.trade-ledger-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.trade-ledger-table thead {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.trade-ledger-table th {
+  padding: 1.25rem 1.5rem;
+  text-align: left;
+  font-weight: 700;
+  color: #2d3748;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.trade-ledger-table td {
+  padding: 1.25rem 1.5rem;
+  color: #4a5568;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.trade-ledger-table tbody tr {
+  transition: all 0.2s;
+}
+
+.table-row-clickable {
+  cursor: pointer;
+}
+
+.table-row-clickable:hover {
+  background: #f7fafc;
+  transform: scale(1.005);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.company-name-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.company-name-cell strong {
+  font-size: 1.05rem;
+  color: #2d3748;
+}
+
+.company-location-sub {
+  font-size: 0.85rem;
+  color: #718096;
+}
+
+/* Company Type Badges for Table */
+.company-badge.badge-both {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  padding: 0.4rem 0.9rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.company-badge.badge-exporter {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  padding: 0.4rem 0.9rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.company-badge.badge-importer {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  padding: 0.4rem 0.9rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+/* Center Header Actions */
+.trade-ledger-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.header-actions {
+  justify-content: center !important;
+  margin-top: 1rem;
+}
+
+/* Responsive Table */
+@media (max-width: 768px) {
+  .trade-ledger-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .trade-ledger-table {
+    min-width: 800px;
+  }
+  
+  .trade-ledger-table th,
+  .trade-ledger-table td {
+    padding: 0.875rem 1rem;
+    font-size: 0.875rem;
+  }
+  
+  .company-name-cell strong {
+    font-size: 0.95rem;
+  }
+  
+  .company-location-sub {
+    font-size: 0.75rem;
+  }
+}
+
+/* Dark Mode for Table */
+.trade-ledger-table-container {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+}
+
+.trade-ledger-table thead {
+  background: var(--bg-tertiary);
+}
+
+.trade-ledger-table th {
+  color: var(--text-primary);
+  border-bottom-color: var(--border-primary);
+}
+
+.trade-ledger-table td {
+  color: var(--text-secondary);
+  border-bottom-color: var(--border-primary);
+}
+
+.table-row-clickable:hover {
+  background: var(--bg-hover);
+}
+
+.company-name-cell strong {
+  color: var(--text-primary);
+}
+
+.company-location-sub {
+  color: var(--text-secondary);
+}
+
+/* Product Pills and Segment Badges */
+.products-cell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  max-width: 200px;
+}
+
+.product-pill {
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+}
+
+.more-products {
+  background: #f5f5f5;
+  color: #757575;
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.segment-badge {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  color: #1565c0;
+  padding: 0.3rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Dark mode for new elements */
+[data-theme="dark"] .product-pill {
+  background: rgba(46, 125, 50, 0.2);
+  color: #81c784;
+}
+
+[data-theme="dark"] .more-products {
+  background: rgba(255, 255, 255, 0.1);
+  color: #bdbdbd;
+}
+
+[data-theme="dark"] .segment-badge {
+  background: rgba(21, 101, 192, 0.2);
+  color: #64b5f6;
+}
+
+/* =====================================
+   TRADE LENS STYLES
+   ===================================== */
+
+.trade-lens-container {
+  padding: 2rem;
+  background-color: var(--bg-secondary);
+  min-height: 100vh;
+}
+
+.trade-lens-header {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  padding: 2.5rem 2rem;
+  border-radius: 16px;
+  margin-bottom: 2rem;
+  box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+}
+
+.trade-lens-header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.trade-lens-header p {
+  font-size: 1.1rem;
+  opacity: 0.95;
+  max-width: 600px;
+}
+
+/* Trade Lens Filters */
+.trade-lens-filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.trade-lens-filters .search-box {
+  flex: 1;
+  min-width: 300px;
+  position: relative;
+}
+
+.trade-lens-filters .search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  color: var(--text-tertiary);
+}
+
+.trade-lens-filters .search-box input {
+  width: 100%;
+  padding: 0.875rem 1rem 0.875rem 3rem;
+  border: 2px solid var(--border-primary);
+  border-radius: 12px;
+  font-size: 1rem;
+  background: var(--card-bg);
+  color: var(--text-primary);
+  transition: all 0.2s;
+}
+
+.trade-lens-filters .search-box input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.trade-lens-filters .category-filter select {
+  padding: 0.875rem 2.5rem 0.875rem 1rem;
+  border: 2px solid var(--border-primary);
+  border-radius: 12px;
+  font-size: 1rem;
+  background: var(--card-bg);
+  color: var(--text-primary);
+  cursor: pointer;
+  min-width: 180px;
+  transition: all 0.2s;
+}
+
+.trade-lens-filters .category-filter select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+/* Trade Lens Stats Row */
+.trade-lens-stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.trade-lens-stat-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-primary);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.2s;
+}
+
+.trade-lens-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+.trade-lens-stat-card .stat-icon {
+  font-size: 2rem;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);
+  border-radius: 12px;
+}
+
+.trade-lens-stat-card .stat-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.trade-lens-stat-card .stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.trade-lens-stat-card .stat-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-top: 0.25rem;
+}
+
+/* Trade Lens Products Grid */
+.trade-lens-products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.trade-lens-product-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-primary);
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.trade-lens-product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+  border-color: var(--color-primary);
+}
+
+.product-card-header {
+  padding: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.product-card-header .product-icon {
+  font-size: 3rem;
+}
+
+.product-card-header .product-category-badge {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.product-card-body {
+  padding: 1.5rem;
+  padding-top: 0;
+}
+
+.product-card-body .product-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.product-card-body .product-hs-code {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
+}
+
+.product-card-body .product-description {
+  font-size: 0.9rem;
+  color: var(--text-tertiary);
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.product-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-primary);
+}
+
+.product-stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.product-stat-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.product-stat-label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 0.15rem;
+}
+
+.product-card-footer {
+  padding: 1rem 1.5rem;
+  background: var(--bg-tertiary);
+  border-top: 1px solid var(--border-primary);
+}
+
+.view-details-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-primary);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.view-details-link svg {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.2s;
+}
+
+.trade-lens-product-card:hover .view-details-link svg {
+  transform: translateX(4px);
+}
+
+/* Trade Lens Responsive */
+@media (max-width: 1024px) {
+  .trade-lens-stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .trade-lens-container {
+    padding: 1rem;
+  }
+  
+  .trade-lens-header {
+    padding: 2rem 1.5rem;
+  }
+  
+  .trade-lens-header h1 {
+    font-size: 1.75rem;
+  }
+  
+  .trade-lens-filters {
+    flex-direction: column;
+  }
+  
+  .trade-lens-filters .search-box {
+    min-width: 100%;
+  }
+  
+  .trade-lens-stats-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .trade-lens-products-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Trade Lens Sub-page Shared Styles */
+.trade-lens-subpage-container {
+  padding: 2rem;
+  background-color: var(--bg-secondary);
+  min-height: 100vh;
+}
+
+.trade-lens-subpage-header {
+  background: var(--card-bg);
+  border: 1px solid var(--border-primary);
+  border-radius: 16px;
+  padding: 1.5rem 2rem;
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.trade-lens-subpage-header .product-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.trade-lens-subpage-header .product-icon {
+  font-size: 2.5rem;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-radius: 12px;
+}
+
+.trade-lens-subpage-header .product-details h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.trade-lens-subpage-header .product-details p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.trade-lens-tabs {
+  display: flex;
+  gap: 0.5rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border-primary);
+  padding: 0.5rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  overflow-x: auto;
+}
+
+.trade-lens-tab {
+  padding: 0.75rem 1.25rem;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.trade-lens-tab:hover {
+  background: var(--bg-hover);
+}
+
+.trade-lens-tab.active {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.trade-lens-content {
+  background: var(--card-bg);
+  border: 1px solid var(--border-primary);
+  border-radius: 16px;
+  padding: 2rem;
+}
+
+/* Trade Lens Overview Cards */
+.trade-lens-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.trade-lens-overview-card {
+  background: var(--bg-tertiary);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.trade-lens-overview-card .card-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.trade-lens-overview-card .card-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.trade-lens-overview-card.primary {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+}
+
+.trade-lens-overview-card.primary .card-value,
+.trade-lens-overview-card.primary .card-label {
+  color: white;
+}
+
+/* Trade Lens Charts */
+.trade-lens-chart-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.trade-lens-chart-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-primary);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.trade-lens-chart-card h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.trade-lens-chart-card.full-width {
+  grid-column: 1 / -1;
+}
+
+/* Trade Lens Table */
+.trade-lens-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.trade-lens-table thead {
+  background: var(--bg-tertiary);
+}
+
+.trade-lens-table th,
+.trade-lens-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.trade-lens-table th {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.trade-lens-table td {
+  color: var(--text-secondary);
+}
+
+.trade-lens-table tbody tr:hover {
+  background: var(--bg-hover);
+}
+
+@media (max-width: 1024px) {
+  .trade-lens-overview-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .trade-lens-chart-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .trade-lens-subpage-container {
+    padding: 1rem;
+  }
+  
+  .trade-lens-subpage-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .trade-lens-subpage-header .product-info {
+    flex-direction: column;
+  }
+  
+  .trade-lens-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .trade-lens-content {
+    padding: 1rem;
+  }
+  
+  .trade-lens-overview-grid {
+    grid-template-columns: 1fr;
+  }
+}

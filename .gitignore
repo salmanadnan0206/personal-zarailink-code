@@ -1,44 +1,24 @@
-# Python
-*.py[cod]
-*$py.class
-*.so
-.Python
-__pycache__/
-*.pyc
-
-# Virtual Environment
-venv/
-env/
-ENV/
-.venv/
-
-# Django
-*.log
-db.sqlite3
-db.sqlite3-journal
-/staticfiles/
-/media/
-
-# Environment variables
-.env
-backend/.env
-.env.local
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Python cache
-__pycache__/
-*.py[cod]
-*.class
-
-# Package files
-package-lock.json
+__pycache__/ 
+*.pyc 
+*.pyo 
+*.pyd 
+.Python 
+env/ 
+venv/ 
+.env 
+.venv 
+*.log 
+local_settings.py 
+db.sqlite3 
+db.sqlite3-journal 
+node_modules/ 
+npm-debug.log 
+yarn-debug.log* 
+yarn-error.log* 
+.npm 
+.yarn-integrity 
+.env 
+.vscode/ 
+.idea/ 
+.DS_Store 
+Thumbs.db 
