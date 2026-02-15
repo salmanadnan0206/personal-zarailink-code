@@ -15,17 +15,17 @@ flowchart LR
 
 | Stage | File | Uses NLP? | Uses ML? |
 |-------|------|-----------|----------|
-| ① Query Parser | [query_parser.py](file:///c:/Users/Dell/Documents/ZaraiLink/backend/search/services/query_parser.py) | ❌ Pure regex/rules | ❌ |
-| ② NLP Matcher | [nlp.py](file:///c:/Users/Dell/Documents/ZaraiLink/backend/search/services/nlp.py) | ✅ SentenceTransformers | ✅ Pretrained embeddings |
-| ③ Aggregation | [aggregation.py](file:///c:/Users/Dell/Documents/ZaraiLink/backend/search/services/aggregation.py) | ❌ | ❌ DB queries only |
-| ④ Ranking | [ranking_ltr.py](file:///c:/Users/Dell/Documents/ZaraiLink/backend/search/services/ranking_ltr.py) | ❌ | ✅ LightGBM LambdaRank |
-| ⑤ Orchestration | [views.py](file:///c:/Users/Dell/Documents/ZaraiLink/backend/search/views.py) | ❌ | ❌ |
+| ① Query Parser | [query_parser.py](./backend/search/services/query_parser.py) | ❌ Pure regex/rules | ❌ |
+| ② NLP Matcher | [nlp.py](./backend/search/services/nlp.py) | ✅ SentenceTransformers | ✅ Pretrained embeddings |
+| ③ Aggregation | [aggregation.py](./backend/search/services/aggregation.py) | ❌ | ❌ DB queries only |
+| ④ Ranking | [ranking_ltr.py](./backend/search/services/ranking_ltr.py) | ❌ | ✅ LightGBM LambdaRank |
+| ⑤ Orchestration | [views.py](./backend/search/views.py) | ❌ | ❌ |
 
 ---
 
 ## ① Query Parser — Regex-Based NLU
 
-**File:** [query_parser.py](file:///c:/Users/Dell/Documents/ZaraiLink/backend/search/services/query_parser.py)
+**File:** [query_parser.py](./backend/search/services/query_parser.py)
 
 Turns `"Buyers in Afghanistan who pay above $500"` into structured JSON. **No ML** — purely regex + scoring rules.
 
@@ -33,18 +33,18 @@ Turns `"Buyers in Afghanistan who pay above $500"` into structured JSON. **No ML
 
 | Field | Method | Example |
 |-------|--------|---------|
-| [intent](file:///c:/Users/Dell/Documents/ZaraiLink/backend/search/services/query_parser.py#117-141) | Phrase scoring (BUY_SCORES vs SELL_SCORES dict) | "buyers" → SELL (+3), "who pay" → SELL (+5) |
+| [intent](./backend/search/services/query_parser.py#117-141) | Phrase scoring (BUY_SCORES vs SELL_SCORES dict) | "buyers" → SELL (+3), "who pay" → SELL (+5) |
 | `product` | Leftover text after stripping keywords/stopwords | "chocolate", "refined sugar" |
 | `country_filter` | Regex match against known country list + fuzzy match (difflib, cutoff=0.85) | "Afghanistan" → `["Afghanistan"]` |
-| `volume_mt` | Regex: [(\d+)\s*(mt\|tons\|kg)](file:///c:/Users/Dell/Documents/ZaraiLink/backend/search/services/ranking_ltr.py#166-177) | "100MT" → `100.0` |
+| `volume_mt` | Regex: [(\d+)\s*(mt\|tons\|kg)](./backend/search/services/ranking_ltr.py#166-177) | "100MT" → `100.0` |
 | `price_floor/ceiling` | Regex: `above\|below + $\d+` | "above $500" → `price_floor: 500` |
-| [time_range](file:///c:/Users/Dell/Documents/ZaraiLink/backend/search/views.py#306-355) | Regex: `Q1 2025`, `last 6 months` | Parsed to date range |
+| [time_range](./backend/search/views.py#306-355) | Regex: `Q1 2025`, `last 6 months` | Parsed to date range |
 | `family` | Priority classification (1-9) based on extracted filters | Family 3 = Volume-Aware, 4 = Price-Constrained |
 | `scope` | From frontend toggle or inferred | "PAKISTAN" or "WORLDWIDE" |
 
 ### Multi-Intent Splitting
 
-Queries with `;` or [and](file:///c:/Users/Dell/Documents/ZaraiLink/backend/search/management/commands/build_search_index.py#12-42) (where the right side has its own intent keyword) get split into sub-intents and merged:
+Queries with `;` or [and](./backend/search/management/commands/build_search_index.py#12-42) (where the right side has its own intent keyword) get split into sub-intents and merged:
 
 ```
 "Buy dextrose under $500; and sell chocolate" → 2 sub-intents, merged
@@ -54,9 +54,9 @@ Queries with `;` or [and](file:///c:/Users/Dell/Documents/ZaraiLink/backend/sear
 
 ## ② NLP Matcher — Hybrid Product Matching
 
-**File:** [nlp.py](file:///c:/Users/Dell/Documents/ZaraiLink/backend/search/services/nlp.py)
+**File:** [nlp.py](./backend/search/services/nlp.py)
 
-Maps the extracted product term (e.g., `"chocolate"`) to [ProductSubCategory](file:///c:/Users/Dell/Documents/ZaraiLink/backend/trade_data/models.py#44-51) IDs. **Uses ML** (pretrained embeddings).
+Maps the extracted product term (e.g., `"chocolate"`) to [ProductSubCategory](./backend/trade_data/models.py#44-51) IDs. **Uses ML** (pretrained embeddings).
 
 ### Two-Pass Matching
 
@@ -74,7 +74,7 @@ scores = cosine_similarity(query_vec, precomputed_index)
 # Finds related products like "Cocoa Powder" even if "chocolate" isn't in the name
 ```
 
-- The semantic index is prebuilt via `python manage.py build_search_index` — encodes all [ProductSubCategory](file:///c:/Users/Dell/Documents/ZaraiLink/backend/trade_data/models.py#44-51) names into a pickle file ([build_search_index.py](file:///c:/Users/Dell/Documents/ZaraiLink/backend/search/management/commands/build_search_index.py))
+- The semantic index is prebuilt via `python manage.py build_search_index` — encodes all [ProductSubCategory](./backend/trade_data/models.py#44-51) names into a pickle file ([build_search_index.py](./backend/search/management/commands/build_search_index.py))
 - Semantic matches ≥ 0.4 cosine similarity are kept
 - Keyword matches override semantic (score=1.0 vs cosine score)
 
@@ -86,7 +86,7 @@ If the parser extracts no product (e.g., `"Buyers in Afghanistan who pay above $
 
 ## ③ Aggregation — Database Retrieval + Volume Scoring
 
-**File:** [aggregation.py](file:///c:/Users/Dell/Documents/ZaraiLink/backend/search/services/aggregation.py)
+**File:** [aggregation.py](./backend/search/services/aggregation.py)
 
 Takes subcategory IDs + filters → queries PostgreSQL → returns counterparty candidates.
 
@@ -127,7 +127,7 @@ VolumeScore = 0.5 × min(max_single_shipment / V, 1.0)
 
 ## ④ Ranking — LightGBM LambdaRank + Heuristic Ensemble
 
-**File:** [ranking_ltr.py](file:///c:/Users/Dell/Documents/ZaraiLink/backend/search/services/ranking_ltr.py)
+**File:** [ranking_ltr.py](./backend/search/services/ranking_ltr.py)
 
 This is the **ML-based** ranking layer. It uses a **70/30 ensemble** of heuristic scores and a trained LightGBM LambdaRank model.
 
@@ -169,9 +169,9 @@ FinalScore = 0.7 × HeuristicScore + 0.3 × LTR_Score
 
 ### How the LTR Model Is Trained
 
-**Training script:** [train_ltr.py](file:///c:/Users/Dell/Documents/ZaraiLink/backend/search/services/train_ltr.py)
+**Training script:** [train_ltr.py](./backend/search/services/train_ltr.py)
 
-**Dataset builder:** [ltr_dataset_builder.py](file:///c:/Users/Dell/Documents/ZaraiLink/backend/search/services/ltr_dataset_builder.py)
+**Dataset builder:** [ltr_dataset_builder.py](./backend/search/services/ltr_dataset_builder.py)
 
 ```mermaid
 flowchart TD
@@ -198,7 +198,7 @@ Key details:
 
 ## ⑤ Response Assembly
 
-**File:** [views.py](file:///c:/Users/Dell/Documents/ZaraiLink/backend/search/views.py)
+**File:** [views.py](./backend/search/views.py)
 
 Final orchestration:
 
